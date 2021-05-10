@@ -7,7 +7,8 @@ This plugin is developed within a docker container but you could also install jr
 To run a docker container use the following command (maybe change the path to this repo):
 
 ```sh
-docker run -it --name panfinder --rm -v $HOME/git/logstash-filter-panfinder:/logstash-filter-panfinder ruby:latest bash
+docker build -t ruby_dev -f Dockerfile.dev . 
+docker run -it --name panfinder --rm -v $HOME/git/logstash-filter-panfinder:/logstash-filter-panfinder ruby_dev bash
 ```
 
 Within the container execute the follwing command to set everything up:
@@ -69,4 +70,22 @@ Run Logstash
 
 ```sh
 gem build logstash-filter-panfinder.gemspec
+```
+
+## Publish
+
+Add rubygems to container
+
+```sh
+echo "---
+:rubygems_api_key: rubygems_xxxx
+:status: :ok" > /root/.gem/credentials
+chmod 0600 ~/.gem/credentials
+```
+
+```sh
+bundle install
+bundle exec rake vendor
+bundle exec rspec
+bundle exec rake publish_gem
 ```
