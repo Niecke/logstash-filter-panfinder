@@ -23,3 +23,50 @@ To execute all tests execute the following command:
 ```sh
 bundle exec rspec
 ```
+
+### Test in Logstash
+
+Run a logstash container with 
+
+```sh
+docker run -it -v $HOME/git/logstash-filter-panfinder:/logstash-filter-panfinder --rm --name logstash7 logstash:7.10.2 bash
+```
+
+And add a filter under /usr/share/logstash/pipeline/logstash.conf
+
+```
+input {
+  file {
+    path => "/tmp/logs"
+    start_position => "beginning"
+  }
+}
+
+filter {
+  panfinder { }
+}
+
+output {
+  file {
+   path => "/tmp/out"
+ }
+}
+```
+
+Install the Plugin
+
+```sh
+bin/logstash-plugin install /logstash-filter-panfinder/logstash-filter-panfinder-0.0.1.gem
+```
+
+Run Logstash
+
+```sh
+ bin/logstash
+```
+
+## Build
+
+```sh
+gem build logstash-filter-panfinder.gemspec
+```
