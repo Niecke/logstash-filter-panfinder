@@ -125,12 +125,12 @@ describe LogStash::Filters::Panfinder do
     end
   end
 
-  describe "Panfinder with sanatize" do
+  describe "Panfinder with sanitize" do
     let(:config) do <<-CONFIG
       filter {
         panfinder {
           luhn => true
-          sanatize => true
+          sanitize => true
         }
       }
     CONFIG
@@ -138,7 +138,7 @@ describe LogStash::Filters::Panfinder do
   
     # multiple pan
     pans_formated = {
-      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! SANATIZED PAN !### some more text ###! SANATIZED PAN !### and not luhn 67012345679901236",
+      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! sanitizeD PAN !### some more text ###! sanitizeD PAN !### and not luhn 67012345679901236",
     }
     pans_formated.each do |input, output|
       sample("message" => input) do
@@ -147,12 +147,12 @@ describe LogStash::Filters::Panfinder do
     end
   end
 
-  describe "Panfinder with sanatize" do
+  describe "Panfinder with sanitize" do
     let(:config) do <<-CONFIG
       filter {
         panfinder {
           luhn => false
-          sanatize => true
+          sanitize => true
         }
       }
     CONFIG
@@ -160,7 +160,7 @@ describe LogStash::Filters::Panfinder do
   
     # multiple pan
     pans_formated = {
-      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! SANATIZED PAN !### some more text ###! SANATIZED PAN !### and not luhn ###! SANATIZED PAN !###",
+      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! sanitizeD PAN !### some more text ###! sanitizeD PAN !### and not luhn ###! sanitizeD PAN !###",
     }
     pans_formated.each do |input, output|
       sample("message" => input) do

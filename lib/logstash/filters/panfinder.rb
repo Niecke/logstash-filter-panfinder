@@ -9,9 +9,9 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
   #
   # filter {
   #   panfinder {
-  #     source => "My message..."
+  #     source => "message"
   #     luhn => true
-  #     sanatize => false
+  #     sanitize => false
   #   }
   # }
   #
@@ -19,7 +19,7 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
 
   config :source, :validate => :string, :default => 'message'
   config :luhn, :validate => :boolean, :default => true
-  config :sanatize, :validate => :boolean, :default => false
+  config :sanitize, :validate => :boolean, :default => false
 
   public
   def register
@@ -49,6 +49,7 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
     # 4-5-6
     # 4-6-4
     # 4-6-5
+    # and everythin with 13-19 digits without any special characters
     pans_maybe = msg.scan(/(\D|^)((\d{13,19})|(\d{4}\D{0,1}((\d{4}\D{0,1}\d{4}\D{0,1}\d{4}(\D{0,1}\d{3}|))|(\d{4}\D{0,1}\d{5})|(\d{5}\D{0,1}\d{6})|\d{6}\D{0,1}(\d{5}|\d{4}))))(\D|$)/)
 
     unless pans_maybe.empty?
@@ -57,15 +58,15 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
         # if luhn is enabled check the pan_number otherwise always add the pan_number
         if (not @luhn) || luhn_valid?(pan_number)
           pans_valid.append(pan_number)
-          if @sanatize 
-            msg = msg.gsub(pan_number, "###! SANATIZED PAN !###")
+          if @sanitize 
+            msg = msg.gsub(pan_number, "###! sanitizeD PAN !###")
           end
         end
       end
       # if any pans where valid add them to the event
       unless pans_valid.empty?
         event.set("pans", pans_valid)
-        if @sanatize
+        if @sanitize
         event.set(@source, msg)
         end
       end
