@@ -1,6 +1,7 @@
 # Logstash Plugin
 
-[![Travis Build Status](https://travis-ci.com/logstash-plugins/logstash-filter-example.svg)](https://travis-ci.com/logstash-plugins/logstash-filter-example)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Niecke_logstash-filter-panfinder&metric=bugs)](https://sonarcloud.io/dashboard?id=Niecke_logstash-filter-panfinder)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Niecke_logstash-filter-panfinder&metric=code_smells)](https://sonarcloud.io/dashboard?id=Niecke_logstash-filter-panfinder)
 
 This is a plugin for [Logstash](https://github.com/elastic/logstash).
 
