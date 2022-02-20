@@ -1,3 +1,3 @@
-FROM jruby:9.2.17.0-jre8
+FROM jruby:9.3.2.0-jre8
 
 RUN apt update ; apt install -y git vim
