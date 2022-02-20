@@ -12,6 +12,7 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
   #     source => "message"
   #     luhn => true
   #     sanitize => false
+  #     extended => false
   #   }
   # }
   #
@@ -20,6 +21,7 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
   config :source, :validate => :string, :default => 'message'
   config :luhn, :validate => :boolean, :default => true
   config :sanitize, :validate => :boolean, :default => false
+  config :extended, :validate => :boolean, :default => false
 
   public
   def register
@@ -59,7 +61,7 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
         if (not @luhn) || luhn_valid?(pan_number)
           pans_valid.append(pan_number)
           if @sanitize 
-            msg = msg.gsub(pan_number, "###! sanitizeD PAN !###")
+            msg = msg.gsub(pan_number, "###! sanitized PAN !###")
           end
         end
       end
@@ -67,7 +69,42 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
       unless pans_valid.empty?
         event.set("pans", pans_valid)
         if @sanitize
-        event.set(@source, msg)
+          event.set(@source, msg)
+        end
+
+        # if extended check is enabled go through the pans again
+        if @extended
+          visa_pans = []
+          mc_pans = []
+          amex_pans = []
+          pans_valid.each do |pan_number_match|
+            # visa
+            if pan_number_match =~ /^(4\d{3}.?(\d{4}.?){3})$/
+              visa_pans.append(pan_number_match)
+            end
+
+            # mastercard
+            if pan_number_match =~ /^(5[1-5]\d{2}.?(\d{4}.?){3})|(2[2-7]\d{2}.?(\d{4}.?){3})$/
+              mc_pans.append(pan_number_match)
+            end
+
+            # american express
+            if pan_number_match =~ /^((34|37)\d{2}.?\d{6}.?\d{5})$/
+              amex_pans.append(pan_number_match)
+            end
+          end
+          
+          unless visa_pans.empty?
+            event.set("pans_visa", visa_pans)
+          end
+
+          unless mc_pans.empty?
+            event.set("pans_mc", mc_pans)
+          end
+
+          unless amex_pans.empty?
+            event.set("pans_amex", amex_pans)
+          end
         end
       end
     end
