@@ -5,6 +5,11 @@ bundle install
 
 bundle exec rspec
 
+# setup codespace
+sdk install java 8.0.382-amzn
 
-bundle the gem
-gem build logstash-filter-<yourplugin>.gemspec
+rvm reinstall jruby
+
+jruby -S bundle install
+
+jruby -S bundle exec rspec

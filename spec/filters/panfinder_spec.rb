@@ -18,31 +18,31 @@ describe LogStash::Filters::Panfinder do
 
     pans = {
       # Visa
-      "text 4111111111111111 some more text"    => "4111111111111111",
-      "text 4111141011111111116 some more text" => "4111141011111111116",
+      "text 4111111111111111 some more text"    => {'simple' => ["4111111111111111"]},
+      "text 4111141011111111116 some more text" => {'simple' => ["4111141011111111116"]},
 
       # Mastercard
-      "text 5500000000000004 some more text" => "5500000000000004",
-      "text 2720990000000015 some more text" => "2720990000000015",
+      "text 5500000000000004 some more text" => {'simple' => ["5500000000000004"]},
+      "text 2720990000000015 some more text" => {'simple' => ["2720990000000015"]},
       
       # Maestro
-      "text 67012345678901236 some more text" => "67012345678901236",
+      "text 67012345678901236 some more text" => {'simple' => ["67012345678901236"]},
 
       # AMEX
-      "text 340000000000009 some more text" => "340000000000009",
-      "text 370000000000002 some more text" => "370000000000002",
+      "text 340000000000009 some more text" => {'simple' => ["340000000000009"]},
+      "text 370000000000002 some more text" => {'simple' => ["370000000000002"]},
 
       # JCB
-      "text 3528000000000007 some more text" => "3528000000000007",
+      "text 3528000000000007 some more text" => {'simple' => ["3528000000000007"]},
 
       # Diners/Discover
-      "text 30000000000004 some more text" => "30000000000004",
-      "text 6011111111111117 some more text" => "6011111111111117",
+      "text 30000000000004 some more text" => {'simple' => ["30000000000004"]},
+      "text 6011111111111117 some more text" => {'simple' => ["6011111111111117"]},
     }
 
     pans.each do |input, output|
       sample("message" => input) do
-        expect(subject.get("pans")).to eq([output])
+        expect(subject.get("pans")).to eq(output)
       end
     end
 
@@ -68,33 +68,33 @@ describe LogStash::Filters::Panfinder do
     # formated pans
     pans_formated = {
       # Visa
-      "text 4111 1111 1111 1111 some more text"    => "4111 1111 1111 1111",
-      "text 4111.1111.1111.1111 some more text"    => "4111.1111.1111.1111",
+      "text 4111 1111 1111 1111 some more text"    => {'simple' => ["4111 1111 1111 1111"]},
+      "text 4111.1111.1111.1111 some more text"    => {'simple' => ["4111.1111.1111.1111"]},
 
       # Mastercard
-      "text 5500 0000 0000 0004 some more text" => "5500 0000 0000 0004",
-      "text 2720#9900#0000#0015 some more text" => "2720#9900#0000#0015",
+      "text 5500 0000 0000 0004 some more text" => {'simple' => ["5500 0000 0000 0004"]},
+      "text 2720#9900#0000#0015 some more text" => {'simple' => ["2720#9900#0000#0015"]},
       
       # AMEX
-      "text 3400 000000 00009 some more text" => "3400 000000 00009",
-      "text 3700-000000-00002 some more text" => "3700-000000-00002",
+      "text 3400 000000 00009 some more text" => {'simple' => ["3400 000000 00009"]},
+      "text 3700-000000-00002 some more text" => {'simple' => ["3700-000000-00002"]},
 
       # JCB
-      "text 3528 0000 0000 0007 some more text" => "3528 0000 0000 0007",
+      "text 3528 0000 0000 0007 some more text" => {'simple' => ["3528 0000 0000 0007"]},
 
       # Diners/Discover
-      "text 3000 000000 0004 some more text" => "3000 000000 0004",
-      "text 6011 1111 1111 1117 some more text" => "6011 1111 1111 1117",
+      "text 3000 000000 0004 some more text" => {'simple' => ["3000 000000 0004"]},
+      "text 6011 1111 1111 1117 some more text" => {'simple' => ["6011 1111 1111 1117"]},
     }
     pans_formated.each do |input, output|
       sample("message" => input) do
-        expect(subject.get("pans")).to eq([output])
+        expect(subject.get("pans")).to eq(output)
       end
     end
 
     # multiple pan
     pans_formated = {
-      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => ["4111 1111 1111 1111", "2720#9900#0000#0015"],
+      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => {'simple' => ["4111 1111 1111 1111", "2720#9900#0000#0015"]},
     }
     pans_formated.each do |input, output|
       sample("message" => input) do
@@ -116,7 +116,7 @@ describe LogStash::Filters::Panfinder do
 
     # multiple pan
     pans_formated = {
-      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => ["4111 1111 1111 1111", "2720#9900#0000#0015", "67012345679901236"],
+      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => {"simple" => ["4111 1111 1111 1111", "2720#9900#0000#0015", "67012345679901236"]},
     }
     pans_formated.each do |input, output|
       sample("message" => input) do
@@ -138,7 +138,7 @@ describe LogStash::Filters::Panfinder do
   
     # multiple pan
     pans_formated = {
-      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! sanitizeD PAN !### some more text ###! sanitizeD PAN !### and not luhn 67012345679901236",
+      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! sanitized PAN !### some more text ###! sanitized PAN !### and not luhn 67012345679901236",
     }
     pans_formated.each do |input, output|
       sample("message" => input) do
@@ -160,13 +160,60 @@ describe LogStash::Filters::Panfinder do
   
     # multiple pan
     pans_formated = {
-      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! sanitizeD PAN !### some more text ###! sanitizeD PAN !### and not luhn ###! sanitizeD PAN !###",
+      "text 4111 1111 1111 1111 some more text 2720#9900#0000#0015 and not luhn 67012345679901236"    => "text ###! sanitized PAN !### some more text ###! sanitized PAN !### and not luhn ###! sanitized PAN !###",
     }
     pans_formated.each do |input, output|
       sample("message" => input) do
         expect(subject.get("message")).to eq(output)
       end
     end
+  end
+
+  describe "Panfinder with extended" do
+    let(:config) do <<-CONFIG
+      filter {
+        panfinder {
+          luhn => false
+          extended => true
+        }
+      }
+    CONFIG
+    end
+  
+    # extended pan check
+    pans_formated = {
+        # Visa
+        "text 4111 1111 1111 1111 some more text"    => { "pans_visa": ["4111 1111 1111 1111"]},
+        "text 4111.1111.1111.1111 some more text"    => { "pans_visa": ["4111.1111.1111.1111"]},
+  
+        # Mastercard
+        "text 5100 0000 0000 0004 some more text" => { "pans_mc": ["5100 0000 0000 0004"]},
+        "text 2720#9900#0000#0015 some more text" => { "pans_mc": ["2720#9900#0000#0015"]},
+        
+        # VISA + MC
+        "text 5100 0000 0000 0004 some more text 4111.1111.1111.1111" => { "pans_mc": ["5100 0000 0000 0004"], "pans_visa": ["4111.1111.1111.1111"]},
+
+        # AMEX
+        "text 3400 000000 00009 some more text" => { "pans_amex": ["3400 000000 00009"]},
+        "text 3700-000000-00002 some more text" => { "pans_amex": ["3700-000000-00002"]},
+  
+        # JCB
+        #"text 3528 0000 0000 0007 some more text" => "3528 0000 0000 0007",
+  
+        # Diners/Discover
+        "text 3000 000000 0004 some more text" => { "pans_diners": ["3000 000000 0004"]},
+        "text 6011 1111 1111 1117 some more text" => { "pans_discover": ["6011 1111 1111 1117"]},
+    }
+    pans_formated.each do |input, output|
+      sample("message" => input) do
+        expect(subject.get("pans")['visa']).to eq(output[:pans_visa])
+        expect(subject.get("pans")['mc']).to eq(output[:pans_mc])
+        expect(subject.get("pans")['amex']).to eq(output[:pans_amex])
+        expect(subject.get("pans")['discover']).to eq(output[:pans_discover])
+      end
+    end
+
+
   end
 
 end
