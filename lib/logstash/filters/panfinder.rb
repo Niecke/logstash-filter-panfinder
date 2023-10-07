@@ -32,8 +32,8 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
 
     # this array will contain all numbers that satisfy the regex
     pans_maybe = []
-    # this array will contain all pans which will be added to event
-    pans_valid = []
+    # this dict will contain all pans which will be added to event
+    pans = {'simple' => []}
 
     msg = event.get(@source)
 
@@ -59,25 +59,24 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
         pan_number = pan_number_match[1]
         # if luhn is enabled check the pan_number otherwise always add the pan_number
         if (not @luhn) || luhn_valid?(pan_number)
-          pans_valid.append(pan_number)
+          pans['simple'].append(pan_number)
           if @sanitize 
             msg = msg.gsub(pan_number, "###! sanitized PAN !###")
           end
         end
       end
       # if any pans where valid add them to the event
-      unless pans_valid.empty?
-        event.set("pans", pans_valid)
-        if @sanitize
-          event.set(@source, msg)
-        end
-
+      unless pans['simple'].empty?
+        
+        visa_pans = []
+        mc_pans = []
+        maestro_pans = []
+        amex_pans = []
+        diners_pans = []
+        discover_pans = []
         # if extended check is enabled go through the pans again
         if @extended
-          visa_pans = []
-          mc_pans = []
-          amex_pans = []
-          pans_valid.each do |pan_number_match|
+          pans['simple'].each do |pan_number_match|
             # visa
             if pan_number_match =~ /^(4\d{3}.?(\d{4}.?){3})$/
               visa_pans.append(pan_number_match)
@@ -88,23 +87,55 @@ class LogStash::Filters::Panfinder < LogStash::Filters::Base
               mc_pans.append(pan_number_match)
             end
 
+            # maestro
+            if pan_number_match =~ /^(50\d{2}|5[6-8]\d{2}|6\d{3}).?(\d{4}.?\d{4}.?\d{4}(\d{3})?|\d{6}.?\d{5}|\d{4}.?\d{5})$/
+              maestro_pans.append(pan_number_match)
+            end
+
             # american express
             if pan_number_match =~ /^((34|37)\d{2}.?\d{6}.?\d{5})$/
               amex_pans.append(pan_number_match)
             end
+            
+            # diners club international OR diners club united states & canada
+            if pan_number_match =~ /^30[0-5].?(\d{6}).?(\d{4})$/ or pan_number_match=~ /^5[4-5]\d{2}.?(\d{4}).?(\d{4}).?(\d{4})$/
+              diners_pans.append(pan_number_match)
+            end
+
+            # discover
+            if pan_number_match =~ /^6((011|22[1-9]|4[4-9]\d|5\d{2})(.?\d{4}){3})$/
+              discover_pans.append(pan_number_match)
+            end
           end
-          
+        
           unless visa_pans.empty?
-            event.set("pans_visa", visa_pans)
+            pans['visa'] = visa_pans
           end
 
           unless mc_pans.empty?
-            event.set("pans_mc", mc_pans)
+            pans['mc'] = mc_pans
+          end
+
+          unless maestro_pans.empty?
+            pans['maestro'] = maestro_pans
           end
 
           unless amex_pans.empty?
-            event.set("pans_amex", amex_pans)
+            pans['amex'] = amex_pans
           end
+
+          unless diners_pans.empty?
+            pans['diners'] = diners_pans
+          end
+
+          unless discover_pans.empty?
+            pans['discover'] = discover_pans
+          end
+        end
+
+        event.set("pans", pans)
+        if @sanitize
+          event.set(@source, msg)
         end
       end
     end
